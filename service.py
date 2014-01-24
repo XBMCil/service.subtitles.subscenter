@@ -162,7 +162,7 @@ def search(item):
     # Retrieve the search results (html)
     searchResults = getURL(BASE_URL + "/he/subtitle/search/?q=" + searchString.lower())
     # Search most likely timed out, no results
-    if not searchResults or searchResults.index():
+    if not searchResults:
         return
 
     # Look for subtitles page links
@@ -284,7 +284,7 @@ params = get_params()
 log(__scriptname__, "params: %s" % (params))
 
 if params['action'] in ['search', 'manualsearch']:
-    log(__scriptname__, "action '$s' called", (params['action']))
+    log(__scriptname__, "action '%s' called" % (params['action']))
     item = {}
     item['temp'] = False
     item['rar'] = False
