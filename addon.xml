@@ -5,7 +5,7 @@
        provider-name="CaTz">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
-	<import addon="xbmc.json" version="6.0.0"/>
+    <import addon="xbmc.json" version="6.0.0"/>
   </requires>
   <extension point="xbmc.subtitle.module"
              library="service.py" />
