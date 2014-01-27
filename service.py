@@ -36,8 +36,8 @@ releases_types = ['2011', '2009', '2012', '2010', '2013', '2014', 'web-dl', 'web
 # Regular expression patterns
 #===============================================================================
 MULTI_RESULTS_PAGE_PATTERN = u"עמוד (?P<curr_page>\d*) \( סך הכל: (?P<total_pages>\d*) \)"
-MOVIES_SEARCH_RESULTS_PATTERN = "<div class=\"generalWindowRight\">.*?<a href=\"(?P<sid>/he/subtitle/movie/.*?)\">.*?<div class=\"generalWindowBottom\">"
-TV_SEARCH_RESULTS_PATTERN = "<div class=\"generalWindowRight\">.*?<a href=\"(?P<sid>/he/subtitle/series/.*?)\">.*?<div class=\"generalWindowBottom\">"
+MOVIES_SEARCH_RESULTS_PATTERN = '<div class="generalWindowRight">.*?<a href="[^"]+(/he/subtitle/movie/.*?)">.*?<div class="generalWindowBottom">'
+TV_SEARCH_RESULTS_PATTERN = '<div class="generalWindowRight">.*?<a href="[^"]+(/he/subtitle/series/.*?)">.*?<div class="generalWindowBottom">'
 
 #===============================================================================
 # Private utility functions
