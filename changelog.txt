@@ -1,9 +1,9 @@
 3.0
 - Migration to Gotham standards
-- Threshold of 2 pages in search result
+- Threshold of 2 pages in _search result
 - Using native JSON parser
 - Sort the subtitle list by rating in context of full list, (so if there was any movie that is not related, 
-	but still exists in the search results, the full list will have the most relevant subtitles at the top) 
+	but still exists in the _search results, the full list will have the most relevant subtitles at the top)
 
 2.5 
 - support for Subscenter new website + workaround (10x to CaTz)
