@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-
 import os
 import sys
 import re
 import urllib
 import urllib2
 import unicodedata
+import json
+import zlib
 from stubs import xbmc
 from stubs import xbmcvfs
 from stubs import xbmcaddon
@@ -26,29 +27,19 @@ def normalizeString(str):
 
 
 def log(module, msg):
-    print "%s - %s" % (module, msg)
-    #xbmc.log((u"### [%s] - %s" % (module, msg,)).encode('utf-8'), level=xbmc.LOGDEBUG)
+    xbmc.log((u"### [%s] - %s" % (module, msg,)).encode('utf-8'), level=xbmc.LOGDEBUG)
 
 
 class SubscenterHelper:
     BASE_URL = "http://www.subscenter.org"
-    RLS_TYPES = ['web-dl', 'webrip', '480p', '720p', '1080p', 'h264', 'x264', 'xvid', 'ac3',
-                 'aac', 'hdtv', 'dvdscr', 'dvdrip', 'ac3', 'brrip', 'bluray', 'dd51', 'divx',
-                 'proper', 'repack', 'pdtv', 'rerip', 'dts']
-    #===============================================================================
-    # Regular expression patterns
-    #===============================================================================
-    MULTI_RESULTS_PAGE_PATTERN = u"עמוד (?P<curr_page>\d*) \( סך הכל: (?P<total_pages>\d*) \)"
-    MOVIES_SEARCH_RESULTS_PATTERN = '<div class="generalWindowRight">.*?<a href="[^"]+(/he/subtitle/movie/.*?)">.*?<div class="generalWindowBottom">'
-    TV_SEARCH_RESULTS_PATTERN = '<div class="generalWindowRight">.*?<a href="[^"]+(/he/subtitle/series/.*?)">.*?<div class="generalWindowBottom">'
 
     def __init__(self):
         self.urlHandler = URLHandler()
 
     def get_subtitle_list(self, item):
-        results = []
-
         search_results = self._search(item)
+        results = self._build_subtitle_list(search_results, item)
+        print results
         return results
 
     # return list of movies / tv-series from the site`s search
@@ -59,17 +50,14 @@ class SubscenterHelper:
         query = {"q": search_string.lower()}
         search_result = self.urlHandler.request(self.BASE_URL + "/he/subtitle/search/?" + urllib.urlencode(query))
         if search_result is None:
-            return results #return empty set
+            return results # return empty set
 
         urls = re.findall('<a href=".*/he/subtitle/(movie|series)/([^/]+)/">[^/]+ / ([^<]+)</a>', search_result)
         years = re.findall(u'<span class="special">[^:]+: </span>(\d{4}).<br />', search_result)
         for i, year in enumerate(years):
             urls[i] += (year,)
 
-        print urls
-        urls = self._filter_urls(urls, search_string, item)
-        print urls
-
+        results = self._filter_urls(urls, search_string, item)
         return results
 
 
@@ -80,17 +68,68 @@ class SubscenterHelper:
             if ((content_type == "movie" and not item["tvshow"]) or
                     (content_type == "series" and item["tvshow"])) and \
                     search_string.startswith(eng_name.replace(' ...', '').lower()) and \
-                    ((int(year) - 1) <= int(item["year"]) <= (int(year) + 1) or
-                    (int(item["year"]) - 1) <= int(year) <= (int(item["year"]) + 1)):
+                    (item["year"] == '' or
+                                 (int(year) - 1) <= int(item["year"]) <= (int(year) + 1) or
+                                 (int(item["year"]) - 1) <= int(year) <= (int(item["year"]) + 1)):
                 filtered.append({"type": content_type, "name": eng_name, "slug": slug, "year": year})
-
+        log("filtered ", "%s" % filtered)
         return filtered
+
+    def _build_subtitle_list(self, search_results, item):
+        ret = []
+        for result in search_results:
+            url = self.BASE_URL + "/he/cinemast/data/" + result["type"] + "/sb/" + result["slug"]
+            url += "/" + item["season"] + "/" + item["episode"] + "/" if result["type"] == "series" else "/"
+            subs_list = self.urlHandler.request(url)
+
+            if subs_list is not None:
+                subs_list = json.loads(subs_list, encoding="utf-8")
+                total_downloads = 0
+                for language in subs_list.keys():
+                    if xbmc.convertLanguage(language, xbmc.ISO_639_2) in item["3let_language"]:
+                        for translator_group in subs_list[language]:
+                            for quality in subs_list[language][translator_group]:
+                                for index in subs_list[language][translator_group][quality]:
+                                    current = subs_list[language][translator_group][quality][index]
+                                    title = current["subtitle_version"]
+                                    subtitle_rate = self.calc_rating(title, item["file_name"])
+                                    total_downloads += current["downloaded"]
+                                    ret.append(
+                                        {'lang_index': item["3let_language"].index(
+                                            xbmc.convertLanguage(language, xbmc.ISO_639_2)),
+                                         'filename': title,
+                                         'link': current["key"],
+                                         'language_name': xbmc.convertLanguage(language, xbmc.ENGLISH_NAME),
+                                         'language_flag': language,
+                                         'ID': current["id"],
+                                         'rating': current["downloaded"],
+                                         'sync': subtitle_rate >= 3.5,
+                                         'hearing_imp': current["hearing_impaired"] > 0
+                                        })
+        # Fix the rating
+        for it in ret:
+            it["rating"] = str(int((it["rating"]/float(total_downloads))*5))
+        return sorted(ret, key=lambda x: (x['lang_index'], x['sync'], x['rating']), reverse=True)
+
+    def calc_rating(self, subsfile, videofile):
+        log(__scriptname__, "# Comparing Releases:\n %s [subtitle-rls] \n %s [filename-rls]" % (subsfile, videofile))
+        subsfile = re.sub('\W', '.', subsfile).lower()
+        videofile = re.sub('\W', '.', videofile).lower()
+
+        subsfile = subsfile.split('.')
+        videofile = videofile.split('.')[:-1]
+
+        diff = list(set(videofile) - set(subsfile))
+        rating = (1 - (len(diff) / float(len(videofile)))) * 5
+        log(__scriptname__, "rating = %f" % round(rating, 1))
+
+        return round(rating, 1)
 
 
 class URLHandler():
     def __init__(self):
         self.opener = urllib2.build_opener()
-        self.opener.addheaders = [('Accept-Encoding', 'gzip, deflate'),
+        self.opener.addheaders = [('Accept-Encoding', 'gzip'),
                                   ('Accept-Language', 'en-us,en;q=0.5'),
                                   ('Pragma', 'no-cache'),
                                   ('Cache-Control', 'no-cache'),
@@ -98,13 +137,13 @@ class URLHandler():
                                    'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0')]
 
     def request(self, url, data=None, ajax=False, referer=None, cookie=None):
-        if (data != None):
+        if data is not None:
             data = urllib.urlencode(data)
-        if (ajax == True):
+        if ajax:
             self.opener.addheaders += [('X-Requested-With', 'XMLHttpRequest')]
-        if (referer != None):
+        if referer is not None:
             self.opener.addheaders += [('Referer', referer)]
-        if (cookie != None):
+        if cookie is not None:
             self.opener.addheaders += [('Cookie', cookie)]
 
         content = None
@@ -112,6 +151,13 @@ class URLHandler():
         try:
             response = self.opener.open(url, data)
             content = None if response.code != 200 else response.read()
+
+            if response.headers.get('content-encoding', '') == 'gzip':
+                try:
+                    content = zlib.decompress(content, 16 + zlib.MAX_WBITS)
+                except zlib.error:
+                    pass
+
             response.close()
         except Exception as e:
             log(__scriptname__, "Failed to get url: %s\n%s" % (url, e))
@@ -119,10 +165,13 @@ class URLHandler():
         return content
 
 
-item = {}
-item["tvshow"] = "true detective"
-item["title"] = ""
-item["year"] = 2013
+item = {'episode': '11', 'temp': False, 'title': 'Blind Spot', 'season': '2', 'year': '', 'rar': False,
+        'tvshow': 'Arrow',
+        'file_original_path': u'D:\\Videos\\Series\\Arrow\\Season  2\\Arrow.S02E11.720p.HDTV.X264-DIMENSION.mkv',
+        'file_name': u'Arrow.S02E11.720p.HDTV.X264-DIMENSION.mkv',
+        '3let_language': ['en', 'he']}
+
+# {'episode': '4', 'temp': False, 'title': 'Killer Within', 'season': '3', 'year': '', 'rar': False, 'tvshow': 'The Walking Dead', 'file_original_path': u'D:\\Videos\\Series\\The.Walking.Dead\\Season 3\\The.Walking.Dead.S03E04.720p.HDTV.x264-IMMERSE.mkv', '3let_language': ['eng', 'heb']}
 helper = SubscenterHelper()
 helper.get_subtitle_list(item)
 

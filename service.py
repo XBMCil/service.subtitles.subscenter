@@ -35,7 +35,7 @@ releases_types = ['2011', '2009', '2012', '2010', '2013', '2014', 'web-dl', 'web
 #===============================================================================
 # Regular expression patterns
 #===============================================================================
-MULTI_RESULTS_PAGE_PATTERN = u"???? (?P<curr_page>\d*) \( ?? ???: (?P<total_pages>\d*) \)"
+MULTI_RESULTS_PAGE_PATTERN = u"עמוד (?P<curr_page>\d*) \( סך הכל: (?P<total_pages>\d*) \)"
 MOVIES_SEARCH_RESULTS_PATTERN = '<div class="generalWindowRight">.*?<a href="[^"]+(/he/subtitle/movie/.*?)">.*?<div class="generalWindowBottom">'
 TV_SEARCH_RESULTS_PATTERN = '<div class="generalWindowRight">.*?<a href="[^"]+(/he/subtitle/series/.*?)">.*?<div class="generalWindowBottom">'
 
@@ -129,7 +129,7 @@ def prepare_subtitle_list(subtitle_page_uri, language_list, file_name):
 
     log(__scriptname__, "data=%s" % (subtitlePage))
     found_subtitles = json.loads(subtitlePage, encoding="utf-8")
-
+    total_downloads = 0
     for language in found_subtitles.keys():
         if xbmc.convertLanguage(language, xbmc.ISO_639_2) in language_list:
             for translator in found_subtitles[language]:
@@ -138,6 +138,7 @@ def prepare_subtitle_list(subtitle_page_uri, language_list, file_name):
                         current = found_subtitles[language][translator][quality][rating]
                         title = current["subtitle_version"]
                         subtitle_rate = get_rating(title, file_name)
+                        total_downloads += int(current["downloaded"])
                         subtitles_list.append(
                             {'lang_index': language_list.index(xbmc.convertLanguage(language, xbmc.ISO_639_2)),
                              'filename': title,
@@ -145,10 +146,14 @@ def prepare_subtitle_list(subtitle_page_uri, language_list, file_name):
                              'language_name': xbmc.convertLanguage(language, xbmc.ENGLISH_NAME),
                              'language_flag': language,
                              'ID': current["id"],
-                             'rating': str(subtitle_rate),
+                             'rating': current["downloaded"],
                              'sync': subtitle_rate >= 8,
                              'hearing_imp': current["hearing_impaired"] > 0
                             })
+        # Fix the rating
+    for it in subtitles_list:
+        it["rating"] = str(int(round((round(it["rating"] / float(total_downloads), 1)) * 5)))
+
     return subtitles_list
 
 
@@ -159,8 +164,8 @@ def search(item):
         searchString = item['title'].replace(" ", "+")
     log(__scriptname__, "Search string = %s" % (searchString.lower()))
 
-    # Retrieve subtitles list
-    searchResults = getURL(BASE_URL + "/he/subtitle/search/?q=" + urllib.urlencode(searchString.lower()))
+    # Retrieve the search results (html)
+    searchResults = getURL(BASE_URL + "/he/subtitle/search/?q=" + searchString.lower())
     # Search most likely timed out, no results
     if not searchResults:
         return
@@ -207,7 +212,7 @@ def search(item):
 
     if subtitles_list:
         # Sort the subtitles
-        subtitles_list = sorted(subtitles_list, key=lambda x: int(float(x['rating'])), reverse=True)
+        subtitles_list = sorted(subtitles_list, key=lambda x: (x['lang_index'], x['sync'], x['rating']), reverse=True)
         for it in subtitles_list:
             listitem = xbmcgui.ListItem(label=it["language_name"],
                                         label2=it["filename"],
@@ -321,7 +326,7 @@ if params['action'] in ['search', 'manualsearch']:
     elif ( item['file_original_path'].find("stack://") > -1 ):
         stackPath = item['file_original_path'].split(" , ")
         item['file_original_path'] = stackPath[0][8:]
-
+    log(__scriptname__, "%s" % item)
     search(item)
 
 
