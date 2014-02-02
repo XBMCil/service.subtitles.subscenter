@@ -7,20 +7,19 @@ import unicodedata
 import json
 import zlib
 import shutil
-from stubs import xbmc
-from stubs import xbmcvfs
-from stubs import xbmcaddon
-# import xbmc
-# import xbmcvfs
-# import xbmcaddon
+# from stubs import xbmc
+# from stubs import xbmcvfs
+# from stubs import xbmcaddon
+import xbmc
+import xbmcvfs
+import xbmcaddon
 
 
 __addon__ = xbmcaddon.Addon()
 __version__ = __addon__.getAddonInfo('version') # Module version
 __scriptname__ = __addon__.getAddonInfo('name')
-__profile__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))#.decode("utf-8")
-#__temp__ = xbmc.translatePath(os.path.join(__profile__, 'temp'))#.decode("utf-8")
-__temp__ = ""
+__profile__ = xbmc.translatePath(__addon__.getAddonInfo('profile')).decode("utf-8")
+__temp__ = xbmc.translatePath(os.path.join(__profile__, 'temp')).decode("utf-8")
 
 
 
@@ -60,9 +59,9 @@ class SubscenterHelper:
 
         urls = re.findall('<a href=".*/he/subtitle/(movie|series)/([^/]+)/">[^/]+ / ([^<]+)</a>', search_result)
         years = re.findall(u'<span class="special">[^:]+: </span>(\d{4}).<br />', search_result)
-        for i, year in enumerate(years):
+        for i, url in enumerate(urls):
+            year = years[i] if len(years)>i else ''
             urls[i] += (year,)
-        # TODO: fix the years - there is no year for evry movie
 
         results = self._filter_urls(urls, search_string, item)
         return results
@@ -77,6 +76,7 @@ class SubscenterHelper:
                     (content_type == "series" and item["tvshow"])) and \
                     search_string.startswith(eng_name.replace(' ...', '').lower()) and \
                     (item["year"] == '' or
+                    year == '' or
                                  (int(year) - 1) <= int(item["year"]) <= (int(year) + 1) or
                                  (int(item["year"]) - 1) <= int(year) <= (int(item["year"]) + 1)):
                 filtered.append({"type": content_type, "name": eng_name, "slug": slug, "year": year})
@@ -111,7 +111,7 @@ class SubscenterHelper:
                                          'language_flag': language,
                                          'ID': current["id"],
                                          'rating': current["downloaded"],
-                                         'sync': subtitle_rate >= 3.5,
+                                         'sync': subtitle_rate >= 4,
                                          'hearing_imp': current["hearing_impaired"] > 0
                                         })
             # Fix the rating
@@ -215,11 +215,11 @@ class URLHandler():
 # #         'file_original_path': u'D:\\Videos\\Movies\\Broken Arrow (1996)\\Broken-Arrow_720p BluRay,,DTS.x264-CDDHD.mp4',
 # #         '3let_language': ['en', 'he']}
 # # {'episode': '4', 'temp': False, 'title': 'Killer Within', 'season': '3', 'year': '', 'rar': False, 'tvshow': 'The Walking Dead', 'file_original_path': u'D:\\Videos\\Series\\The.Walking.Dead\\Season 3\\The.Walking.Dead.S03E04.720p.HDTV.x264-IMMERSE.mkv', '3let_language': ['eng', 'heb']}
-item = {'episode': '', 'temp': False, 'title': 'Free Birds', 'season': '', 'year': '2013', 'rar': False, 'tvshow': '',
-        'file_original_path': u'D:\\Videos\\Movies\\Free.Birds.2013.1080p.BRRip.x264-YIFY\\FB13.1080p.BRRip.x264-YIFY.mp4',
-        '3let_language': ['en', 'he']}
-helper = SubscenterHelper()
-helper.get_subtitle_list(item)
+# item = {'episode': '', 'temp': False, 'title': 'Free Birds', 'season': '', 'year': '2013', 'rar': False, 'tvshow': '',
+#         'file_original_path': u'D:\\Videos\\Movies\\Free.Birds.2013.1080p.BRRip.x264-YIFY\\FB13.1080p.BRRip.x264-YIFY.mp4',
+#         '3let_language': ['en', 'he']}
+# helper = SubscenterHelper()
+# helper.get_subtitle_list(item)
 #
 #
 # def get_rating(subsfile, videofile):
