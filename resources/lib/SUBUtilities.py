@@ -157,11 +157,10 @@ class SubscenterHelper:
         query = {"v": filename,
                  "key": key}
         url = self.BASE_URL + "/he/subtitle/download/" + language + "/" + str(id) + "/?" + urllib.urlencode(query)
-        log(__scriptname__, "Fetching subtitles using url %s" % url)
-        f = urllib.urlopen(url)
+        f = self.urlHandler.request(url)
 
         with open(zip_filename, "wb") as subFile:
-            subFile.write(f.read())
+            subFile.write(f)
         subFile.close()
         xbmc.sleep(500)
 
