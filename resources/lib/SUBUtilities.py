@@ -52,7 +52,7 @@ class SubscenterHelper:
         results = []
 
         search_string = item["tvshow"] if item["tvshow"] else item["title"]
-        query = {"q": search_string.lower()}
+        query = {"q": re.split(r'\s\(\w+\)$', search_string)[0].lower()}
         search_result = self.urlHandler.request(self.BASE_URL + "/he/subtitle/search/?" + urllib.urlencode(query))
         if search_result is None:
             return results # return empty set
