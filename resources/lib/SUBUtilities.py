@@ -7,12 +7,19 @@ import unicodedata
 import json
 import zlib
 import shutil
-# from stubs import xbmc
-# from stubs import xbmcvfs
-# from stubs import xbmcaddon
-import xbmc
-import xbmcvfs
-import xbmcaddon
+try:
+    import StorageServer
+except ImportError:
+    import storageserverdummy as StorageServer
+
+try:
+    import xbmc
+    import xbmcvfs
+    import xbmcaddon
+except ImportError:
+    from stubs import xbmc
+    from stubs import xbmcvfs
+    from stubs import xbmcaddon
 
 
 __addon__ = xbmcaddon.Addon()
@@ -21,7 +28,7 @@ __scriptname__ = __addon__.getAddonInfo('name')
 __profile__ = xbmc.translatePath(__addon__.getAddonInfo('profile')).decode("utf-8")
 __temp__ = xbmc.translatePath(os.path.join(__profile__, 'temp')).decode("utf-8")
 
-
+cache = StorageServer.StorageServer(__scriptname__, int(24 * 364 / 2))  # 6 months
 
 #===============================================================================
 # Private utility functions
@@ -35,6 +42,9 @@ def normalizeString(str):
 def log(module, msg):
     xbmc.log((u"### [%s] - %s" % (module, msg,)).encode('utf-8'), level=xbmc.LOGDEBUG)
 
+def get_cache_key(prefix="", str=""):
+    str = re.sub('\W+', '_', str).lower()
+    return prefix + str
 
 class SubscenterHelper:
     BASE_URL = "http://www.subscenter.org"
@@ -52,18 +62,29 @@ class SubscenterHelper:
         results = []
 
         search_string = re.split(r'\s\(\w+\)$', item["tvshow"])[0] if item["tvshow"] else item["title"]
-        query = {"q": search_string.lower()}
-        search_result = self.urlHandler.request(self.BASE_URL + "/he/subtitle/search/?" + urllib.urlencode(query))
-        if search_result is None:
-            return results # return empty set
+        
+        if item["tvshow"]:
+            cache_key = get_cache_key("tv-show_", search_string)
+            results = cache.get(cache_key)
+            if results:
+                results = eval(results)
+            
+        if not results:
+            query = {"q": search_string.lower()}
+            search_result = self.urlHandler.request(self.BASE_URL + "/he/subtitle/search/?" + urllib.urlencode(query))
+            if search_result is None:
+                return results # return empty set
 
-        urls = re.findall('<a href=".*/he/subtitle/(movie|series)/([^/]+)/">[^/]+ / ([^<]+)</a>', search_result)
-        years = re.findall(u'<span class="special">[^:]+: </span>(\d{4}).<br />', search_result)
-        for i, url in enumerate(urls):
-            year = years[i] if len(years)>i else ''
-            urls[i] += (year,)
-
-        results = self._filter_urls(urls, search_string, item)
+            urls = re.findall('<a href=".*/he/subtitle/(movie|series)/([^/]+)/">[^/]+ / ([^<]+)</a>', search_result)
+            years = re.findall(u'<span class="special">[^:]+: </span>(\d{4}).<br />', search_result)
+            for i, url in enumerate(urls):
+                year = years[i] if len(years)>i else ''
+                urls[i] += (year,)
+            results = self._filter_urls(urls, search_string, item)
+            
+            if item["tvshow"]:
+                cache.set(cache_key, repr(results))
+            
         return results
 
 
