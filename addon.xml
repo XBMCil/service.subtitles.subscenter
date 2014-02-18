@@ -13,7 +13,10 @@
     <summary lang="en">Subscenter.org</summary>
     <description lang="en">Search and Download subtitles from subscenter.org. Contributors: rabak, Ori Varon, sagiben</description>
     <source>https://github.com/XBMCil/service.subtitles.subscenter</source>
-    <email></email>
+    <language></language>
+	<email></email>
+	<forum></forum>
+	<website></website>
     <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
   </extension>
 </addon>
