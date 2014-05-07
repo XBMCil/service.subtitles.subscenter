@@ -40,6 +40,21 @@ def normalizeString(str):
         'NFKD', unicode(unicode(str, 'utf-8'))
     ).encode('ascii', 'ignore')
 
+def parse_tv_rls(rls):
+    groups = re.findall(r"(.*)(?:s|season)(?:\d{2})(?:e|x|episode|\n)(?:\d{2})", rls, re.I)
+    if len(groups) > 0:
+        rls = groups[0].strip()
+
+    log(__scriptname__, "%s %s" % ("TV_RLS: ", rls))
+    return rls
+
+def parse_movie_rls(rls):
+    groups = re.findall(r"(.*)(?:\d{4})?", rls, re.I)
+    if len(groups) > 0:
+        rls = groups[0].strip()
+
+    log(__scriptname__, "%s %s" % ("MOVIE_RLS: ", rls))
+    return rls
 
 def clear_cache():
     cache.delete("tv-show%")
