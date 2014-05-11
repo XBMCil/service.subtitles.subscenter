@@ -185,7 +185,7 @@ class SubscenterHelper:
                                          'language_flag': language,
                                          'id': current["id"],
                                          'rating': str(current["downloaded"]),
-                                         'sync': subtitle_rate >= 3.6,
+                                         'sync': subtitle_rate >= 3.8,
                                          'hearing_imp': current["hearing_impaired"] > 0
                                         })
         # Fix the rating
