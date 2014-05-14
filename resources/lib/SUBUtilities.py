@@ -27,8 +27,8 @@ __addon__ = xbmcaddon.Addon()
 __version__ = __addon__.getAddonInfo('version')  # Module version
 __scriptname__ = __addon__.getAddonInfo('name')
 __language__ = __addon__.getLocalizedString
-__profile__ = xbmc.translatePath(__addon__.getAddonInfo('profile')).decode("utf-8")
-__temp__ = xbmc.translatePath(os.path.join(__profile__, 'temp')).decode("utf-8")
+__profile__ = unicode(xbmc.translatePath(__addon__.getAddonInfo('profile')),'utf-8')
+__temp__ = unicode(xbmc.translatePath(os.path.join(__profile__, 'temp')),'utf-8')
 
 cache = StorageServer.StorageServer(__scriptname__, int(24 * 364 / 2))  # 6 months
 
@@ -79,7 +79,7 @@ def log(module, msg):
 
 
 def get_cache_key(prefix="", str=""):
-    str = re.sub('\W+', '_', str.decode("utf-8"), 0, re.UNICODE).lower()
+    str = re.sub('\W+', '_', unicode(str,'utf-8'), 0, re.UNICODE).lower()
     return prefix + str
 
 
@@ -129,15 +129,15 @@ class SubscenterHelper:
 
     def _filter_urls(self, urls, search_string, item):
         filtered = []
-        search_string = search_string.decode("utf-8").lower()
+        search_string = unicode(search_string,'utf-8').lower()
         search_string = re.sub('\W+', ' ', search_string, 0, re.UNICODE)
         h = HTMLParser.HTMLParser()
 
         log(__scriptname__, "urls: %s" % urls)
 
         for i, (content_type, slug, heb_name, eng_name, year) in enumerate(urls):
-            eng_name = eng_name.decode("utf-8")
-            heb_name = heb_name.decode("utf-8")
+            eng_name = unicode(eng_name,'utf-8')
+            heb_name = unicode(heb_name,'utf-8')
 
             eng_name = h.unescape(eng_name).replace(' ...', '').lower()
             heb_name = h.unescape(heb_name).replace(' ...', '')
