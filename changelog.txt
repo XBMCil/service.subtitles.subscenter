@@ -1,3 +1,6 @@
+3.2 - by maortal 14/05/2014
+- Performance boost replaced decode with unicode method (show be replaced again if XBMC moves to python3)
+
 3.1.9 - by CaTz 11/05/2014
 - Advanced Movie Title / TV-show parsing (includes release)
 
