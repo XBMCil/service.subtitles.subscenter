@@ -96,6 +96,7 @@ def get_params(string=""):
 params = get_params()
 
 if params['action'] in ['search', 'manualsearch']:
+    log(__scriptname__, "Version: '%s'" % (__version__))
     log(__scriptname__, "action '%s' called" % (params['action']))
 
     if params['action'] == 'manualsearch':
