@@ -48,10 +48,13 @@ def clean_title(item):
 
 
 def parse_rls_title(item):
-    groups = re.findall(r"(.*)(?:s|season)(\d{2})(?:e|x|episode|\n)(\d{2})", item["title"], re.I)
+    item["title"] = regexHelper.sub(' ', item["title"])
+    item["tvshow"] = regexHelper.sub(' ', item["tvshow"])
+
+    groups = re.findall(r"(.*) (?:s|season|)(\d{1,2})(?:e|episode|x|\n)(\d{1,2})", item["title"], re.I)
 
     if len(groups) == 0:
-        groups = re.findall(r"(.*)(?:s|season)(\d{2})(?:e|x|episode|\n)(\d{2})", item["tvshow"], re.I)
+        groups = re.findall(r"(.*) (?:s|season|)(\d{1,2})(?:e|episode|x|\n)(\d{1,2})", item["tvshow"], re.I)
 
     if len(groups) > 0 and len(groups[0]) == 3:
         title, season, episode = groups[0]
