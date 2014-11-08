@@ -28,7 +28,7 @@ __version__ = __addon__.getAddonInfo('version')  # Module version
 __scriptname__ = __addon__.getAddonInfo('name')
 __language__ = __addon__.getLocalizedString
 __profile__ = unicode(xbmc.translatePath(__addon__.getAddonInfo('profile')), 'utf-8')
-__temp__ = unicode(xbmc.translatePath(os.path.join(__profile__, 'temp')), 'utf-8')
+__temp__ = unicode(xbmc.translatePath(os.path.join(__profile__, 'temp', '')), 'utf-8')
 
 cache = StorageServer.StorageServer(__scriptname__, int(24 * 364 / 2))  # 6 months
 regexHelper = re.compile('\W+', re.UNICODE)
@@ -185,8 +185,7 @@ class SubscenterHelper:
                                     subtitle_rate = self._calc_rating(title, item["file_original_path"])
                                     total_downloads += current["downloaded"]
                                     ret.append(
-                                        {'lang_index': item["3let_language"].index(
-                                            xbmc.convertLanguage(language, xbmc.ISO_639_2)),
+                                        {'is_preferred': xbmc.convertLanguage(language, xbmc.ISO_639_2) == item['preferredlanguage'],
                                          'filename': title,
                                          'link': current["key"],
                                          'language_name': xbmc.convertLanguage(language, xbmc.ENGLISH_NAME),
@@ -201,7 +200,7 @@ class SubscenterHelper:
             for it in ret:
                 it["rating"] = str(int(round(float(it["rating"]) / float(total_downloads), 1) * 5))
 
-        return sorted(ret, key=lambda x: (x['lang_index'], x['sync'], x['rating']), reverse=True)
+        return sorted(ret, key=lambda x: (x['is_preferred'], x['sync'], x['rating']), reverse=True)
 
     def _calc_rating(self, subsfile, file_original_path):
         file_name = os.path.basename(file_original_path)
