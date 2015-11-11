@@ -72,20 +72,25 @@ def parse_rls_title(item):
     item["title"] = regexHelper.sub(' ', item["title"])
     item["tvshow"] = regexHelper.sub(' ', item["tvshow"])
 
-    groups = re.findall(r"(.*) (?:s|season|)(\d{1,2})(?:e|episode|x|\n)(\d{1,2})", item["title"], re.I)
+    groups = re.findall(r"(.*?) (\d{4})? ?(?:s|season|)(\d{1,2})(?:e|episode|x|\n)(\d{1,2})", item["title"], re.I)
 
     if len(groups) == 0:
-        groups = re.findall(r"(.*) (?:s|season|)(\d{1,2})(?:e|episode|x|\n)(\d{1,2})", item["tvshow"], re.I)
+        groups = re.findall(r"(.*?) (\d{4})? ?(?:s|season|)(\d{1,2})(?:e|episode|x|\n)(\d{1,2})", item["tvshow"], re.I)
 
-    if len(groups) > 0 and len(groups[0]) == 3:
-        title, season, episode = groups[0]
+    if len(groups) > 0 and len(groups[0]) >= 3:
+        if len(groups[0]) == 3:
+            title, season, episode = groups[0]
+        else:
+            title, year, season, episode = groups[0]
+            item["year"] = str(int(year))
+
         item["tvshow"] = regexHelper.sub(' ', title).strip()
         item["season"] = str(int(season))
         item["episode"] = str(int(episode))
         log(__scriptname__, "TV Parsed Item: %s" % (item,))
 
     else:
-        groups = re.findall(r"(.*)(\d{4})", item["title"], re.I)
+        groups = re.findall(r"(.*?)(\d{4})", item["title"], re.I)
         if len(groups) > 0 and len(groups[0]) >= 1:
             title = groups[0][0]
             item["title"] = regexHelper.sub(' ', title).strip()
