@@ -82,7 +82,7 @@ def parse_rls_title(item):
             title, season, episode = groups[0]
         else:
             title, year, season, episode = groups[0]
-            item["year"] = str(int(year))
+            item["year"] = str(int(year)) if len(year)==4 else year
 
         item["tvshow"] = regexHelper.sub(' ', title).strip()
         item["season"] = str(int(season))
