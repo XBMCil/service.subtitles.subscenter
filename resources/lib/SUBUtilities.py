@@ -103,13 +103,13 @@ def clear_cache():
     xbmc.executebuiltin((u'Notification(%s,%s)' % (__scriptname__, __language__(32004))).encode('utf-8'))
 
 
+def get_cache_key(prefix="", str=""):
+    str = re.sub(r'[\'\(\)\.\-\]\[ ]+', '_', str).lower()
+    return prefix + str
+
+
 def log(module, msg):
     xbmc.log((u"### [%s] - %s" % (module, msg,)).encode('utf-8'), level=xbmc.LOGDEBUG)
-
-
-def get_cache_key(prefix="", str=""):
-    str = regexHelper.sub('_', str).lower()
-    return prefix + str
 
 
 class SubscenterHelper:
