@@ -274,14 +274,16 @@ class SubscenterHelper:
 
         xbmc.executebuiltin(('XBMC.Extract("%s","%s")' % (zip_filename, __temp__,)).encode('utf-8'), True)
 
-    def login(self):
+    def login(self, isFromSettings=False):
         email = __addon__.getSetting("Email")
         password = __addon__.getSetting("Password")
         post_data = {'username': email, 'password': password}
         content = self.urlHandler.request(self.BASE_URL + "login/", post_data)
 
         if content['result'] == 'success':
-            notify(32010)
+            if isFromSettings:
+                notify(32010)
+
             del content["result"]
             return content
         else:

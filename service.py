@@ -163,6 +163,7 @@ elif params['action'] == 'clear_store':
 
 elif params['action'] == 'login':
     helper = SubscenterHelper()
-    helper.login()
+    helper.login(True)
+    __addon__.openSettings()
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))  ## send end of directory to XBMC
