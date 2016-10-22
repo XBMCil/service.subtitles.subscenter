@@ -52,7 +52,7 @@ def search(item):
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False)
 
 
-def download(id, language, key, filename, stack=False):
+def download(id, language, key, filename):
     subtitle_list = []
     exts = [".srt", ".sub"]
 
