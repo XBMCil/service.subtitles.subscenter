@@ -120,7 +120,7 @@ if params['action'] in ['search', 'manualsearch']:
         params['searchstring'] = urllib.unquote(params['searchstring'])
 
     item = {}
-    #Patch: Added and changed by burekas - Enables using the Manual Search in the subtitles dialog when no playing media.
+    
     if xbmc.Player().isPlaying():
         item['temp'] = False
         item['rar'] = False
@@ -147,13 +147,12 @@ if params['action'] in ['search', 'manualsearch']:
         item['preferredlanguage'] = unicode(urllib.unquote(params.get('preferredlanguage', '')), 'utf-8')
         item['preferredlanguage'] = xbmc.convertLanguage(item['preferredlanguage'], xbmc.ISO_639_2)
 
-    #Patch: Added and changed by burekas - Enables using the Manual Search in the subtitles dialog when no playing media.
-    if item['title'] == "":
-        if xbmc.Player().isPlaying():
-            log("VideoPlayer.OriginalTitle not found")
-            item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.Title"))  # no original title, get just Title
-        else:
-            item['title'] = "Serach For..." # or any dump title to get No subtitle Found #burekas
+
+    if item['title'] == "" and xbmc.Player().isPlaying():
+        log("VideoPlayer.OriginalTitle not found")
+        item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.Title"))  # no original title, get just Title
+    else:
+        item['title'] = "Serach For..." # or any dump title to get "No subtitle Found" #burekas
 
     if params['action'] == 'manualsearch':
         if item['season'] != '' or item['episode']:
