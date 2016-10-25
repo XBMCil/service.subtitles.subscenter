@@ -152,7 +152,7 @@ if params['action'] in ['search', 'manualsearch']:
         log("VideoPlayer.OriginalTitle not found")
         item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.Title"))  # no original title, get just Title
     else:
-        item['title'] = "Serach For..." # or any dump title to get "No subtitle Found" #burekas
+        item['title'] = "Search For..." # Needed to avoid showing previous search result.
 
     if params['action'] == 'manualsearch':
         if item['season'] != '' or item['episode']:
