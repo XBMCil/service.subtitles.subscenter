@@ -120,21 +120,39 @@ if params['action'] in ['search', 'manualsearch']:
         params['searchstring'] = urllib.unquote(params['searchstring'])
 
     item = {}
-    item['temp'] = False
-    item['rar'] = False
-    item['year'] = xbmc.getInfoLabel("VideoPlayer.Year")  # Year
-    item['season'] = str(xbmc.getInfoLabel("VideoPlayer.Season"))  # Season
-    item['episode'] = str(xbmc.getInfoLabel("VideoPlayer.Episode"))  # Episode
-    item['tvshow'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))  # Show
-    item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))  # try to get original title
-    item['file_original_path'] = urllib.unquote(unicode(xbmc.Player().getPlayingFile(), 'utf-8'))  # Full path of a playing file
-    item['3let_language'] = []
-    item['preferredlanguage'] = unicode(urllib.unquote(params.get('preferredlanguage', '')), 'utf-8')
-    item['preferredlanguage'] = xbmc.convertLanguage(item['preferredlanguage'], xbmc.ISO_639_2)
+    
+    if xbmc.Player().isPlaying():
+        item['temp'] = False
+        item['rar'] = False
+        item['year'] = xbmc.getInfoLabel("VideoPlayer.Year")  # Year
+        item['season'] = str(xbmc.getInfoLabel("VideoPlayer.Season"))  # Season
+        item['episode'] = str(xbmc.getInfoLabel("VideoPlayer.Episode"))  # Episode
+        item['tvshow'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))  # Show
+        item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))  # try to get original title
+        item['file_original_path'] = urllib.unquote(unicode(xbmc.Player().getPlayingFile(), 'utf-8'))  # Full path of a playing file
+        item['3let_language'] = []
+        item['preferredlanguage'] = unicode(urllib.unquote(params.get('preferredlanguage', '')), 'utf-8')
+        item['preferredlanguage'] = xbmc.convertLanguage(item['preferredlanguage'], xbmc.ISO_639_2)
 
-    if item['title'] == "":
+    else:
+        item['temp'] = False
+        item['rar'] = False
+        item['year'] = ""
+        item['season'] = ""
+        item['episode'] = ""
+        item['tvshow'] = ""
+        item['title'] = ""
+        item['file_original_path'] = ""
+        item['3let_language'] = []
+        item['preferredlanguage'] = unicode(urllib.unquote(params.get('preferredlanguage', '')), 'utf-8')
+        item['preferredlanguage'] = xbmc.convertLanguage(item['preferredlanguage'], xbmc.ISO_639_2)
+
+
+    if item['title'] == "" and xbmc.Player().isPlaying():
         log("VideoPlayer.OriginalTitle not found")
         item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.Title"))  # no original title, get just Title
+    else:
+        item['title'] = "Serach For..." # or any dump title to get "No subtitle Found" #burekas
 
     if params['action'] == 'manualsearch':
         if item['season'] != '' or item['episode']:
