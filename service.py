@@ -192,7 +192,7 @@ elif params['action'] == 'download':
     subs = download(params["id"], params["language"], params["link"], params["filename"])
     ## we can return more than one subtitle for multi CD versions, for now we are still working out how to handle that in XBMC core
     for sub in subs:
-        if params["language"] == 'he':
+        if params["language"] == 'he' and xbmc.Player().isPlaying():
             mirror_sub(params["id"], params["filename"], sub)
         listitem = xbmcgui.ListItem(label=sub)
         xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=sub, listitem=listitem, isFolder=False)
