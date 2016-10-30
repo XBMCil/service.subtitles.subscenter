@@ -141,18 +141,16 @@ if params['action'] in ['search', 'manualsearch']:
         item['season'] = ""
         item['episode'] = ""
         item['tvshow'] = ""
-        item['title'] = ""
+        item['title'] = "Search For..."  # Needed to avoid showing previous search result.
         item['file_original_path'] = ""
         item['3let_language'] = []
         item['preferredlanguage'] = unicode(urllib.unquote(params.get('preferredlanguage', '')), 'utf-8')
         item['preferredlanguage'] = xbmc.convertLanguage(item['preferredlanguage'], xbmc.ISO_639_2)
 
 
-    if item['title'] == "" and xbmc.Player().isPlaying():
+    if item['title'] == "":
         log("VideoPlayer.OriginalTitle not found")
         item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.Title"))  # no original title, get just Title
-    else:
-        item['title'] = "Search For..." # Needed to avoid showing previous search result.
 
     if params['action'] == 'manualsearch':
         if item['season'] != '' or item['episode']:
