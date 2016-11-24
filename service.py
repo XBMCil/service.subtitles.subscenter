@@ -119,6 +119,23 @@ def mirror_sub(id, filename, sub_file):
     except:
         pass
 
+def takeTitleFromFocusedItem():
+    labelType = xbmc.getInfoLabel("ListItem.DBTYPE")  #movie/tvshow/season/episode
+    labelMovieTitle = xbmc.getInfoLabel("ListItem.OriginalTitle")
+    labelYear = xbmc.getInfoLabel("ListItem.Year")
+    labelTVShowTitle = xbmc.getInfoLabel("ListItem.TVShowTitle")
+    labelSeason = xbmc.getInfoLabel("ListItem.Season")
+    labelEpisode = xbmc.getInfoLabel("ListItem.Episode")
+
+    title = 'SearchFor...'
+    if labelType == 'movie' and labelMovieTitle and labelYear:
+        title = labelMovieTitle + " " + labelYear
+    elif labelType == 'episode' and labelTVShowTitle and labelSeason and labelEpisode:
+        title = ("%s S%.2dE%.2d" % (labelTVShowTitle, int(labelSeason), int(labelEpisode)))
+
+    return title
+
+
 params = get_params()
 
 if params['action'] in ['search', 'manualsearch']:
@@ -150,7 +167,7 @@ if params['action'] in ['search', 'manualsearch']:
         item['season'] = ""
         item['episode'] = ""
         item['tvshow'] = ""
-        item['title'] = "Search For..."  # Needed to avoid showing previous search result.
+        item['title'] = takeTitleFromFocusedItem()
         item['file_original_path'] = ""
         item['3let_language'] = []
         item['preferredlanguage'] = unicode(urllib.unquote(params.get('preferredlanguage', '')), 'utf-8')
