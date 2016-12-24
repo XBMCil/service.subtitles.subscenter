@@ -52,3 +52,13 @@ class TestSubscenterHelper(TestCase):
 
         self.assertEqual(result[0]['name'], 'marvels agents of shield')
         self.assertEqual(result[0]['year'], '2013')
+
+    def test_get_subtitle_list6_should_ignore_year_on_tvshow(self):
+        item = {'episode': '5', 'title': 'Episode 5', 'preferredlanguage': '', 'season': '3',
+                'year': '2016', 'tvshow': 'The Affair', '3let_language': ['eng', 'heb']}
+
+        parse_rls_title(item)
+        result = self.helper._search(item)
+
+        self.assertEqual(result[0]['name'], 'the affair')
+        self.assertEqual(result[0]['year'], '2014')
