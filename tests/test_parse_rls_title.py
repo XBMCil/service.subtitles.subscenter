@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import test_helpers
 from unittest import TestCase
 from resources.lib.SUBUtilities import parse_rls_title
 
