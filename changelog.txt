@@ -1,3 +1,6 @@
+5.0.1 - by CaTz (24/06/2017)
+- Remove login section from settings
+
 5.0.0 - by CaTz (16/06/2017)
 - Return back to site parsing
 
