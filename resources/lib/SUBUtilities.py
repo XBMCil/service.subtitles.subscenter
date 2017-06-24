@@ -199,7 +199,8 @@ class SubscenterHelper:
             subs_list = self.urlHandler.request(url)
 
             if subs_list is not None:
-                subs_list = json.loads(subs_list, encoding="utf-8")
+                if not isinstance(subs_list, dict):
+                    subs_list = json.loads(subs_list, encoding="utf-8")
                 for language in subs_list:
                     if xbmc.convertLanguage(language, xbmc.ISO_639_2) in item["3let_language"]:
                         for translator in subs_list[language]:
