@@ -26,11 +26,11 @@ __temp__ = unicode(xbmc.translatePath(os.path.join(__profile__, 'temp')), 'utf-8
 
 sys.path.append(__resource__)
 
-from SUBUtilities import SubscenterHelper, log, normalizeString, clear_store, parse_rls_title, clean_title
+from SUBUtilities import SubsHelper, log, normalizeString, clear_store, parse_rls_title, clean_title
 
 
 def search(item):
-    helper = SubscenterHelper()
+    helper = SubsHelper()
     subtitles_list = helper.get_subtitle_list(item)
     if subtitles_list:
         for it in subtitles_list:
@@ -60,7 +60,7 @@ def download(id, language, key, filename):
 
     zip_filename = os.path.join(__temp__, "subs.zip")
 
-    helper = SubscenterHelper()
+    helper = SubsHelper()
     helper.download(id, language, key, filename, zip_filename)
 
     for file in xbmcvfs.listdir(__temp__)[1]:
@@ -228,7 +228,7 @@ elif params['action'] == 'clear_store':
 
 elif params['action'] == 'login':
     clear_store(False)
-    helper = SubscenterHelper()
+    helper = SubsHelper()
     helper.login(True)
     __addon__.openSettings()
 
