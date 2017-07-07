@@ -1,3 +1,7 @@
+6.0.0 - by CaTz (07/07/2017)
+- Rename the addon to Cinemast
+- Start using Cinemast API
+
 5.0.2 - by sagiben (25/06/2017)
 - Fix json parsing error
 
