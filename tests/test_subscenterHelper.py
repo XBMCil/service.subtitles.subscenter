@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import test_helpers
 from unittest import TestCase
-from resources.lib.SUBUtilities import SubscenterHelper, parse_rls_title
+from resources.lib.SUBUtilities import SubsHelper, parse_rls_title
 
 
 class TestSubscenterHelper(TestCase):
     def setUp(self):
-        self.helper = SubscenterHelper()
+        self.helper = SubsHelper()
 
     def test_get_subtitle_list(self):
         item = {'episode': '1', 'title': 'The Blood of Man', 'season': '2', 'year': '', 'tvshow': "Da Vinci's Demons",
