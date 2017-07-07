@@ -8,8 +8,6 @@ import xbmcvfs
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import json
-from requests import post
 
 __addon__ = xbmcaddon.Addon()
 __author__ = __addon__.getAddonInfo('author')
@@ -131,8 +129,7 @@ if params['action'] in ['search', 'manualsearch']:
         item['episode'] = str(xbmc.getInfoLabel("VideoPlayer.Episode"))  # Episode
         item['tvshow'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))  # Show
         item['title'] = normalizeString(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))  # try to get original title
-        item['file_original_path'] = urllib.unquote(
-            unicode(xbmc.Player().getPlayingFile(), 'utf-8'))  # Full path of a playing file
+        item['file_original_path'] = urllib.unquote(unicode(xbmc.Player().getPlayingFile(), 'utf-8'))  # Full path of a playing file
         item['3let_language'] = []
         item['preferredlanguage'] = unicode(urllib.unquote(params.get('preferredlanguage', '')), 'utf-8')
         item['preferredlanguage'] = xbmc.convertLanguage(item['preferredlanguage'], xbmc.ISO_639_2)
