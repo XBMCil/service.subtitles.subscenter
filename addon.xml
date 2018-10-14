@@ -10,9 +10,6 @@
     <description lang="en">Search and Download subtitles from cinemast.org. Contributors: rabak, Ori Varon, sagiben</description>
     <source>https://github.com/XBMCil/service.subtitles.subscenter</source>
     <language>en</language>
-	<email> </email>
-	<forum> </forum>
-	<website> </website>
     <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
   </extension>
 </addon>
